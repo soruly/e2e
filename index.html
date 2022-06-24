@@ -5,7 +5,15 @@ UUID:
 <button id="get" disabled>Get encrypted message from server</button>
 <button id="send">Send encrypted message to server</button>
 <pre id="console"></pre>
-<textarea id="message"></textarea>
+<textarea id="message" cols="50" rows="10" placeholder="(decrypted message)"></textarea>
+<textarea
+  id="encrypted"
+  cols="50"
+  rows="10"
+  readonly
+  disabled
+  placeholder="(encrypted message)"
+></textarea>
 <script>
   const serverPublicJWT = null;
 
@@ -100,13 +108,13 @@ UUID:
         method: "GET",
         headers: { uuid: localStorage.getItem("uuid") },
       });
-      document.querySelector("#console").innerText = await new TextDecoder().decode(
-        await crypto.subtle.decrypt(
-          { name: "RSA-OAEP" },
-          keyPair.privateKey,
-          await res.arrayBuffer()
-        )
+      const resBuffer = await res.arrayBuffer();
+      document.querySelector("#encrypted").innerText = await new TextDecoder().decode(resBuffer);
+      const decryptedText = await new TextDecoder().decode(
+        await crypto.subtle.decrypt({ name: "RSA-OAEP" }, keyPair.privateKey, resBuffer)
       );
+      document.querySelector("#console").innerText = `Client decrypted message: ${decryptedText}`;
+      document.querySelector("#message").value = decryptedText;
     };
     const serverPublicKey = await crypto.subtle.importKey(
       "jwk",
@@ -123,14 +131,16 @@ UUID:
 
     document.querySelector("#send").onclick = async () => {
       document.querySelector("#console").innerText = "sending encrypted message...";
+      const encryptedMessage = await crypto.subtle.encrypt(
+        { name: "RSA-OAEP" },
+        serverPublicKey,
+        new TextEncoder().encode(document.querySelector("#message").value)
+      );
+      document.querySelector("#encrypted").innerText = new TextDecoder().decode(encryptedMessage);
       const res = await fetch("/send", {
         method: "POST",
         headers: { "Content-Type": "application/octet-stream", uuid: localStorage.getItem("uuid") },
-        body: await crypto.subtle.encrypt(
-          { name: "RSA-OAEP" },
-          serverPublicKey,
-          new TextEncoder().encode(document.querySelector("#message").value)
-        ),
+        body: encryptedMessage,
       });
       document.querySelector(
         "#console"
