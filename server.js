@@ -6,6 +6,37 @@ import bodyParser from "body-parser";
 
 const { SERVER_ADDR = "0.0.0.0", SERVER_PORT = 3000 } = process.env;
 
+if (!fs.existsSync("public.json") && !!fs.existsSync("private.json")) {
+  const keyPair = crypto.generateKeyPairSync("rsa", {
+    modulusLength: 4096,
+    publicKeyEncoding: {
+      type: "spki",
+      format: "jwk",
+    },
+    privateKeyEncoding: {
+      type: "pkcs8",
+      format: "jwk",
+      cipher: "aes-256-cbc",
+      passphrase: "top secret",
+    },
+  });
+  fs.outputFileSync("public.json", JSON.stringify(keyPair.publicKey));
+  fs.outputFileSync("private.json", JSON.stringify(keyPair.privateKey));
+}
+
+const serverPrivateKey = await crypto.webcrypto.subtle.importKey(
+  "jwk",
+  JSON.parse(fs.readFileSync("private.json")),
+  {
+    name: "RSA-OAEP",
+    modulusLength: 4096,
+    publicExponent: new Uint8Array([1, 0, 1]),
+    hash: "SHA-256",
+  },
+  true,
+  ["decrypt"]
+);
+
 const app = express();
 
 app.disable("x-powered-by");
@@ -115,9 +146,26 @@ app.get("/get", async (req, res) => {
     );
 });
 
+app.post("/send", async (req, res) => {
+  return res.send(
+    await new TextDecoder().decode(
+      Buffer.from(
+        await crypto.webcrypto.subtle.decrypt({ name: "RSA-OAEP" }, serverPrivateKey, req.body)
+      )
+    )
+  );
+});
+
 app.get("/", (req, res) => {
   res.setHeader("Content-Type", "text/html");
-  return res.send(fs.readFileSync("index.html", "utf8"));
+  return res.send(
+    fs
+      .readFileSync("index.html", "utf8")
+      .replace(
+        "const serverPublicJWT = null;",
+        `const serverPublicJWT = ${fs.readFileSync("public.json")}`
+      )
+  );
 });
 
 app.listen(SERVER_PORT, SERVER_ADDR, () =>

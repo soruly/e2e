@@ -3,8 +3,12 @@ UUID:
 <button id="clear" disabled>Remove local key pair</button>
 <button id="register" disabled>Register</button>
 <button id="get" disabled>Get encrypted message from server</button>
+<button id="send">Send encrypted message to server</button>
 <pre id="console"></pre>
+<textarea id="message"></textarea>
 <script>
+  const serverPublicJWT = null;
+
   document.querySelector("#clear").onclick = () => {
     localStorage.removeItem("uuid");
     indexedDB.deleteDatabase("db");
@@ -103,6 +107,34 @@ UUID:
           await res.arrayBuffer()
         )
       );
+    };
+    const serverPublicKey = await crypto.subtle.importKey(
+      "jwk",
+      serverPublicJWT,
+      {
+        name: "RSA-OAEP",
+        modulusLength: 4096,
+        publicExponent: new Uint8Array([1, 0, 1]),
+        hash: "SHA-256",
+      },
+      true,
+      ["encrypt"]
+    );
+
+    document.querySelector("#send").onclick = async () => {
+      document.querySelector("#console").innerText = "sending encrypted message...";
+      const res = await fetch("/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/octet-stream", uuid: localStorage.getItem("uuid") },
+        body: await crypto.subtle.encrypt(
+          { name: "RSA-OAEP" },
+          serverPublicKey,
+          new TextEncoder().encode(document.querySelector("#message").value)
+        ),
+      });
+      document.querySelector(
+        "#console"
+      ).innerText = `Server decrypted message: ${await res.text()}`;
     };
   })();
 </script>
