@@ -34,7 +34,7 @@ const serverPrivateKey = await crypto.webcrypto.subtle.importKey(
     hash: "SHA-256",
   },
   true,
-  ["decrypt"]
+  ["decrypt"],
 );
 
 const app = express();
@@ -48,7 +48,7 @@ app.use(
     verify: (req, res, buf, encoding) => {
       if (buf && buf.length) req.rawBody = buf.toString(encoding || "utf8");
     },
-  })
+  }),
 );
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
@@ -68,7 +68,7 @@ for (const e of fs.readdirSync("jwk")) {
         hash: "SHA-256",
       },
       true,
-      ["encrypt"]
+      ["encrypt"],
     ),
   };
 }
@@ -85,7 +85,7 @@ app.post("/hello", async (req, res) => {
         hash: "SHA-256",
       },
       true,
-      ["encrypt"]
+      ["encrypt"],
     );
 
     const uuid = crypto.webcrypto.randomUUID();
@@ -94,7 +94,7 @@ app.post("/hello", async (req, res) => {
     const encryptedChallenge = await crypto.webcrypto.subtle.encrypt(
       { name: "RSA-OAEP" },
       publicKey,
-      challenge
+      challenge,
     );
     return res.header({ uuid }).type("octet-stream").end(Buffer.from(encryptedChallenge));
   } catch (e) {
@@ -117,12 +117,12 @@ app.post("/ack", async (req, res) => {
           agent: req.headers["user-agent"],
           publicKey: await crypto.webcrypto.subtle.exportKey(
             "jwk",
-            req.app.locals[req.headers.uuid].publicKey
+            req.app.locals[req.headers.uuid].publicKey,
           ),
         },
         null,
-        2
-      )
+        2,
+      ),
     );
     return res.sendStatus(204);
   }
@@ -140,9 +140,9 @@ app.get("/get", async (req, res) => {
           req.app.locals[req.headers.uuid].publicKey,
           `pid: ${process.pid}, platform ${process.arch} ${
             process.platform
-          } server time now is ${new Date().toISOString()}`
-        )
-      )
+          } server time now is ${new Date().toISOString()}`,
+        ),
+      ),
     );
 });
 
@@ -150,9 +150,9 @@ app.post("/send", async (req, res) => {
   return res.send(
     await new TextDecoder().decode(
       Buffer.from(
-        await crypto.webcrypto.subtle.decrypt({ name: "RSA-OAEP" }, serverPrivateKey, req.body)
-      )
-    )
+        await crypto.webcrypto.subtle.decrypt({ name: "RSA-OAEP" }, serverPrivateKey, req.body),
+      ),
+    ),
   );
 });
 
@@ -163,11 +163,11 @@ app.get("/", (req, res) => {
       .readFileSync("index.html", "utf8")
       .replace(
         "const serverPublicJWT = null;",
-        `const serverPublicJWT = ${fs.readFileSync("public.json")}`
-      )
+        `const serverPublicJWT = ${fs.readFileSync("public.json")}`,
+      ),
   );
 });
 
 app.listen(SERVER_PORT, SERVER_ADDR, () =>
-  console.log(`Media server listening on ${SERVER_ADDR}:${SERVER_PORT}`)
+  console.log(`Media server listening on ${SERVER_ADDR}:${SERVER_PORT}`),
 );
