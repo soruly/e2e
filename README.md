@@ -3,7 +3,7 @@
 Self-hosted End-to-End Encryption in plain JS with zero dependency
 
 [![License](https://img.shields.io/github/license/soruly/e2e.svg?style=flat-square)](https://github.com/soruly/e2e/blob/master/LICENSE)
-[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/soruly/e2e/Node.js%20Lint?style=flat-square)](https://github.com/soruly/e2e/actions)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/soruly/e2e/node.js.yml?style=flat-square)](https://github.com/soruly/e2e/actions)
 
 ## Getting Started
 
