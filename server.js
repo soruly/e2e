@@ -1,12 +1,15 @@
 import "dotenv/config.js";
-import fs from "fs-extra";
-import crypto from "crypto";
+import fs from "node:fs/promises";
+import crypto from "node:crypto";
 import express from "express";
 import bodyParser from "body-parser";
 
 const { SERVER_ADDR = "0.0.0.0", SERVER_PORT = 3000 } = process.env;
 
-if (!fs.existsSync("public.json") && !!fs.existsSync("private.json")) {
+if (
+  !(await fs.stat("public.json").catch(() => null)) ||
+  !(await fs.stat("private.json").catch(() => null))
+) {
   const keyPair = crypto.generateKeyPairSync("rsa", {
     modulusLength: 4096,
     publicKeyEncoding: {
@@ -20,13 +23,13 @@ if (!fs.existsSync("public.json") && !!fs.existsSync("private.json")) {
       passphrase: "top secret",
     },
   });
-  fs.outputFileSync("public.json", JSON.stringify(keyPair.publicKey));
-  fs.outputFileSync("private.json", JSON.stringify(keyPair.privateKey));
+  await fs.writeFile("public.json", JSON.stringify(keyPair.publicKey));
+  await fs.writeFile("private.json", JSON.stringify(keyPair.privateKey));
 }
 
 const serverPrivateKey = await crypto.webcrypto.subtle.importKey(
   "jwk",
-  JSON.parse(fs.readFileSync("private.json")),
+  JSON.parse(await fs.readFile("private.json")),
   {
     name: "RSA-OAEP",
     modulusLength: 4096,
@@ -53,14 +56,14 @@ app.use(
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-fs.ensureDirSync("jwk");
-for (const e of fs.readdirSync("jwk")) {
+await fs.mkdir("jwk", { recursive: true });
+for (const e of await fs.readdir("jwk")) {
   const uuid = e.replace(".json", "");
   app.locals[uuid] = {
     uuid,
     publicKey: await crypto.webcrypto.subtle.importKey(
       "jwk",
-      JSON.parse(fs.readFileSync(`jwk/${e}`)).publicKey,
+      JSON.parse(await fs.readFile(`jwk/${e}`)).publicKey,
       {
         name: "RSA-OAEP",
         modulusLength: 4096,
@@ -107,7 +110,7 @@ app.post("/ack", async (req, res) => {
     Buffer.from(new Uint8Array(req.app.locals[req.headers.uuid].challenge)).toString("hex") ===
     Buffer.from(new Uint8Array(req.body)).toString("hex")
   ) {
-    fs.writeFileSync(
+    await fs.writeFile(
       `jwk/${req.headers.uuid}.json`,
       JSON.stringify(
         {
@@ -130,7 +133,7 @@ app.post("/ack", async (req, res) => {
 });
 
 app.get("/get", async (req, res) => {
-  fs.utimesSync(`jwk/${req.headers.uuid}.json`, new Date(), new Date());
+  await fs.utimes(`jwk/${req.headers.uuid}.json`, new Date(), new Date());
   return res
     .type("octet-stream")
     .end(
@@ -138,9 +141,11 @@ app.get("/get", async (req, res) => {
         await crypto.webcrypto.subtle.encrypt(
           { name: "RSA-OAEP" },
           req.app.locals[req.headers.uuid].publicKey,
-          `pid: ${process.pid}, platform ${process.arch} ${
-            process.platform
-          } server time now is ${new Date().toISOString()}`,
+          Buffer.from(
+            `pid: ${process.pid}, platform ${process.arch} ${
+              process.platform
+            } server time now is ${new Date().toISOString()}`,
+          ),
         ),
       ),
     );
@@ -156,15 +161,13 @@ app.post("/send", async (req, res) => {
   );
 });
 
-app.get("/", (req, res) => {
+app.get("/", async (req, res) => {
   res.setHeader("Content-Type", "text/html");
   return res.send(
-    fs
-      .readFileSync("index.html", "utf8")
-      .replace(
-        "const serverPublicJWT = null;",
-        `const serverPublicJWT = ${fs.readFileSync("public.json")}`,
-      ),
+    (await fs.readFile("index.html", "utf8")).replace(
+      "const serverPublicJWT = null;",
+      `const serverPublicJWT = ${await fs.readFile("public.json")}`,
+    ),
   );
 });
 
