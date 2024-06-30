@@ -7,7 +7,7 @@ Self-hosted End-to-End Encryption in plain JS with zero dependency
 
 ## Getting Started
 
-Prerequisites: nodejs >= 18
+Prerequisites: nodejs >= 20.12
 
 ```
 git clone https://github.com/soruly/e2e.git
