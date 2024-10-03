@@ -172,5 +172,5 @@ app.get("/", async (req, res) => {
 });
 
 app.listen(SERVER_PORT, SERVER_ADDR, () =>
-  console.log(`Media server listening on ${SERVER_ADDR}:${SERVER_PORT}`),
+  console.log(`Server listening on ${SERVER_ADDR}:${SERVER_PORT}`),
 );
