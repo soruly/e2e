@@ -161,14 +161,19 @@ app.post("/send", async (req, res) => {
   );
 });
 
-app.get("/", async (req, res) => {
-  res.setHeader("Content-Type", "text/html");
+app.get("/index.js", async (req, res) => {
+  res.setHeader("Content-Type", "application/javascript");
   return res.send(
-    (await fs.readFile("index.html", "utf8")).replace(
+    (await fs.readFile("index.js", "utf8")).replace(
       "const serverPublicJWT = null;",
       `const serverPublicJWT = ${await fs.readFile("public.json")}`,
     ),
   );
+});
+
+app.get("/", async (req, res) => {
+  res.setHeader("Content-Type", "text/html");
+  return res.send(await fs.readFile("index.html", "utf8"));
 });
 
 app.listen(SERVER_PORT, SERVER_ADDR, () =>
