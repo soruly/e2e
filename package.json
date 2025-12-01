@@ -27,7 +27,7 @@
   },
   "homepage": "https://github.com/soruly/e2e#readme",
   "dependencies": {
-    "express": "^5.1.0"
+    "express": "^5.2.0"
   },
   "devDependencies": {
     "prettier": "^3.7.2"
