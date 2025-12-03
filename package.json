@@ -30,6 +30,6 @@
     "express": "^5.2.1"
   },
   "devDependencies": {
-    "prettier": "^3.7.3"
+    "prettier": "^3.7.4"
   }
 }
