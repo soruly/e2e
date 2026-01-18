@@ -153,13 +153,13 @@ app.get("/get", async (req, res) => {
 });
 
 app.post("/send", async (req, res) => {
-  return res.send(
-    await new TextDecoder().decode(
-      Buffer.from(
-        await crypto.webcrypto.subtle.decrypt({ name: "RSA-OAEP" }, serverPrivateKey, req.body),
-      ),
+  const decodedMessage = await new TextDecoder().decode(
+    Buffer.from(
+      await crypto.webcrypto.subtle.decrypt({ name: "RSA-OAEP" }, serverPrivateKey, req.body),
     ),
   );
+  console.log(`Received message: ${decodedMessage}`);
+  return res.send(decodedMessage);
 });
 
 app.get("/index.js", async (req, res) => {
