@@ -7,13 +7,13 @@ Self-hosted End-to-End Encryption in plain JS with zero dependency
 
 ## Getting Started
 
-Prerequisites: nodejs >= 20.12
+Prerequisites: nodejs >= 22.18
 
 ```
 git clone https://github.com/soruly/e2e.git
 cd e2e
 npm install
-node server.js
+node server.ts
 ```
 
 Note: In order for PWA to work, you must host the server behind a reverse proxy (like nginx) with HTTPS
