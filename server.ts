@@ -29,11 +29,9 @@ if (
 
 const serverPrivateKey = await crypto.webcrypto.subtle.importKey(
   "jwk",
-  JSON.parse(await fs.readFile("private.json")),
+  JSON.parse(await fs.readFile("private.json", "utf8")),
   {
     name: "RSA-OAEP",
-    modulusLength: 4096,
-    publicExponent: new Uint8Array([1, 0, 1]),
     hash: "SHA-256",
   },
   true,
@@ -63,11 +61,9 @@ for (const e of await fs.readdir("jwk")) {
     uuid,
     publicKey: await crypto.webcrypto.subtle.importKey(
       "jwk",
-      JSON.parse(await fs.readFile(`jwk/${e}`)).publicKey,
+      JSON.parse(await fs.readFile(`jwk/${e}`, "utf8")).publicKey,
       {
         name: "RSA-OAEP",
-        modulusLength: 4096,
-        publicExponent: new Uint8Array([1, 0, 1]),
         hash: "SHA-256",
       },
       true,
@@ -83,8 +79,6 @@ app.post("/hello", async (req, res) => {
       req.body,
       {
         name: "RSA-OAEP",
-        modulusLength: 4096,
-        publicExponent: new Uint8Array([1, 0, 1]),
         hash: "SHA-256",
       },
       true,
@@ -166,7 +160,7 @@ app.get("/index.js", async (req, res) => {
   return res.send(
     (await fs.readFile("index.js", "utf8")).replace(
       "const serverPublicJWT = null;",
-      `const serverPublicJWT = ${await fs.readFile("public.json")}`,
+      `const serverPublicJWT = ${await fs.readFile("public.json", "utf8")}`,
     ),
   );
 });
