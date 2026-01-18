@@ -95,11 +95,15 @@ app.post("/hello", async (req, res) => {
     );
     return res.header({ uuid }).type("octet-stream").end(Buffer.from(encryptedChallenge));
   } catch (e) {
-    return res.status(400).send(e.toString());
+    console.error(e);
+    return res.sendStatus(400);
   }
 });
 
 app.post("/ack", async (req, res) => {
+  if (!req.headers.uuid.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+    return res.sendStatus(400);
+  }
   if (
     Buffer.from(new Uint8Array(req.app.locals[req.headers.uuid].challenge)).toString("hex") ===
     Buffer.from(new Uint8Array(req.body)).toString("hex")
@@ -127,6 +131,9 @@ app.post("/ack", async (req, res) => {
 });
 
 app.get("/get", async (req, res) => {
+  if (!req.headers.uuid.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+    return res.sendStatus(400);
+  }
   await fs.utimes(`jwk/${req.headers.uuid}.json`, new Date(), new Date());
   return res
     .type("octet-stream")
