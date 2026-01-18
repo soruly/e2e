@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import crypto from "node:crypto";
 import express from "express";
+import rateLimit from "express-rate-limit";
 import bodyParser from "body-parser";
 
 process.loadEnvFile();
@@ -43,6 +44,8 @@ const app = express();
 app.disable("x-powered-by");
 
 app.set("trust proxy", ["loopback", "linklocal", "uniquelocal"]);
+
+app.use(rateLimit());
 
 app.use(
   bodyParser.raw({
