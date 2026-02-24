@@ -1,8 +1,9 @@
-import fs from "node:fs/promises";
 import crypto from "node:crypto";
+import fs from "node:fs/promises";
+
+import bodyParser from "body-parser";
 import express from "express";
 import rateLimit from "express-rate-limit";
-import bodyParser from "body-parser";
 
 process.loadEnvFile();
 const { SERVER_ADDR = "0.0.0.0", SERVER_PORT = 3000 } = process.env;

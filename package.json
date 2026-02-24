@@ -11,10 +11,10 @@
     "restart": "pm2 restart ecosystem.config.json",
     "reload": "pm2 reload ecosystem.config.json",
     "delete": "pm2 delete ecosystem.config.json",
-    "prettier": "prettier",
-    "format": "prettier --write \"**/*.ts\"",
-    "lint": "prettier --check \"**/*.ts\"",
-    "test": "prettier --check \"**/*.ts\""
+    "oxfmt": "oxfmt",
+    "format": "oxfmt --write \"**/*.ts\"",
+    "lint": "oxfmt --check \"**/*.ts\"",
+    "test": "oxfmt --check \"**/*.ts\""
   },
   "repository": {
     "type": "git",
@@ -33,6 +33,6 @@
   "devDependencies": {
     "@express-rate-limit/tsconfig": "^1.0.2",
     "@types/node": "^25.3.0",
-    "prettier": "^3.8.1"
+    "oxfmt": "^0.35.0"
   }
 }
