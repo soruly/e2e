@@ -35,7 +35,8 @@ Put this file to `/etc/systemd/system/e2e.service`
 ```
 [Unit]
 Description=e2e
-After=network.target
+Wants=network-online.target
+After=network-online.target
 
 [Service]
 User=____
