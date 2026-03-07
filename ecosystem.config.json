@@ -1,9 +1,0 @@
-{
-  "apps": [
-    {
-      "name": "e2e",
-      "interpreter": "node",
-      "script": "server.ts"
-    }
-  ]
-}

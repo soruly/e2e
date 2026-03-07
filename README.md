@@ -28,16 +28,23 @@ SERVER_PORT=3000        # (optional) Default: 3000
 SERVER_ADDR=127.0.0.1   # (optional) Default: 127.0.0.1
 ```
 
-### Run by pm2
+### Run as systemd
 
-You also can use [pm2](https://pm2.keymetrics.io/) to run this in background.
-
-Use below commands to start / restart / stop server.
+Put this file to `/etc/systemd/system/e2e.service`
 
 ```
-npm run start
-npm run stop
-npm run reload
-npm run restart
-npm run delete
+[Unit]
+Description=e2e
+After=network.target
+
+[Service]
+User=____
+Group=____
+WorkingDirectory=/home/____/project/e2e
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/node /home/____/project/e2e/server.ts
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
 ```
