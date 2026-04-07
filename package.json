@@ -28,6 +28,6 @@
   "devDependencies": {
     "@express-rate-limit/tsconfig": "^1.0.2",
     "@types/node": "^25.5.2",
-    "oxfmt": "^0.43.0"
+    "oxfmt": "^0.44.0"
   }
 }
