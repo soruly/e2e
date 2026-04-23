@@ -23,7 +23,7 @@
   "homepage": "https://github.com/soruly/e2e#readme",
   "dependencies": {
     "express": "^5.2.1",
-    "express-rate-limit": "^8.3.2"
+    "express-rate-limit": "^8.4.0"
   },
   "devDependencies": {
     "@express-rate-limit/tsconfig": "^1.0.2",
